@@ -1,7 +1,7 @@
 //элементы страницы
 const city = document.querySelector(".city"); //город
 const hello = document.querySelector(".greeting"); //приветствие
-const buttons = document.querySelector(".buttons"); //блок, где будет ссылка на очистку куки
+const clearLinkContainer = document.querySelector(".clear-link"); //блок, где будет ссылка на очистку куки
 const saveButton = document.querySelector(".save"); //кнопка сохранения отмеченных чекбоксов
 
 //чек-боксы
@@ -22,9 +22,8 @@ const checkValue = (value) => {
 
 //добавляем пользовательское значение в куки
 const cityAddToCookie = () => {
-    let _city = getCity();
-    if (checkValue(_city)) {
-        document.cookie = `city=${_city}`;
+    if (checkValue(getCity())) {
+        document.cookie = `city=${getCity()}`;
     } else {
         document.cookie = `city=`;
     }
@@ -49,23 +48,18 @@ const greeting = () => {
 
 //добавляем сслыку для очистки и следим за ее нажатием - при нажатии чистим куки
 const addButtonForClearCookie = () => {
-    buttons.innerHTML = "<a href='' class='clear-city'>Выбрать другой город</a>";
+    clearLinkContainer.innerHTML = "<a href='' class='clear-city'>Выбрать другой город</a>";
     clearButton = document.querySelector(".clear-city");
     clearButton.addEventListener("click", () => {
         document.cookie = 'city=;max-age=-1;';
-        city.style.cssText = "display: true";
-        hello.style.cssText = "display: none";
-        //Этот блок сбрасывал бы куки для чек-боксов, но по заданию это вроде не надо
-        // ["1", "2", "3", "4", "5", "6"].forEach(element => {
-        //     document.cookie = `${element}=`;
-        // }) 
+        document.cookie = 'changeCity=false;max-age=-1;';
         removeButtonForClearCookie();
     })
 }
 
 //убираем ссылку для очистки куки
 const removeButtonForClearCookie = () => {
-    buttons.innerHTML = "";
+    clearLinkContainer.innerHTML = "";
 }
 
 //запоминаем в куки отмеченные чекбоксы
@@ -90,19 +84,22 @@ const checked = () => {
             }
         })
     }
+
+    if (getCookie("changeCity") == "true" && checkValue(getCookie("city"))) {
+        greeting();
+        addButtonForClearCookie();
+    }
 }
 
 const isSaved = () => {
     return getCookie("saved");
 }
 
-if (getCookie("city") && (getCookie("city") !== '' && getCookie("city") !== undefined)) {
-    greeting();
-    addButtonForClearCookie();
-}
-
 city.addEventListener("input", cityAddToCookie);
-city.addEventListener("change", greeting);
+city.addEventListener("change", () => {
+    document.cookie = "changeCity=true";
+    checked();
+});
 addListenerForCheckboxes();
 saveButton.addEventListener("click", () => {
     document.cookie = "saved=true";
